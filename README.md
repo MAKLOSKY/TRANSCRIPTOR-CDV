@@ -29,9 +29,10 @@ El archivo principal es un `index.html` que contiene toda la lógica JavaScript 
    - Botón para iniciar/detener la transcripción.  
    - Indicador visual de “Escuchando…”.  
    - Select para cambiar idioma (español, inglés, francés, alemán).  
-   - Área de texto donde se ve la transcripción en vivo.  
-   - Botón “Copiar texto” con feedback visual.  
+   - Área de texto donde se ve la transcripción en vivo.
+   - Botón “Copiar texto” con feedback visual.
    - Botón “Limpiar texto” que reinicia todo y detiene el micrófono.
+   - Opción de **modo claro/oscuro** para adaptar la vista a tu preferencia.
 4. **Portabilidad**  
    - Solo un archivo HTML (sin dependencias locales adicionales).  
    - Usa recursos externos (Tailwind CSS y Google Fonts) para agilizar el diseño.
@@ -61,6 +62,7 @@ El archivo principal es un `index.html` que contiene toda la lógica JavaScript 
 3. Abre `http://localhost:8000/` en un navegador compatible (Chrome o Edge).
 4. Pulsa **Iniciar Transcripción** y empieza a hablar.
 5. Puedes **copiar** o **limpiar** el texto generado con los botones correspondientes.
+6. Cambia entre modo claro y oscuro usando el botón **Modo Oscuro/Modo Día**.
 
 **Requisitos**
 - Conexión a Internet para cargar Tailwind CSS y Google Fonts.

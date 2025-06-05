@@ -13,6 +13,23 @@ const statusIndicator = document.getElementById('statusIndicator');
 const statusText = document.getElementById('statusText');
 const messageArea = document.getElementById('messageArea');
 const languageSelect = document.getElementById('languageSelect');
+const themeToggle = document.getElementById('themeToggle');
+
+// --- Manejo del tema claro/oscuro ---
+if (themeToggle) {
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme === 'dark') {
+    document.documentElement.classList.add('dark');
+    themeToggle.textContent = 'Modo Día';
+  }
+
+  themeToggle.addEventListener('click', () => {
+    const htmlEl = document.documentElement;
+    const isDark = htmlEl.classList.toggle('dark');
+    themeToggle.textContent = isDark ? 'Modo Día' : 'Modo Oscuro';
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  });
+}
 
 let recognition = null;
 let isTranscribing = false;

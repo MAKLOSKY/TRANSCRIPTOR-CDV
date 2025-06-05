@@ -10,9 +10,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen">
-  <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-2xl">
-    <h1 class="text-2xl font-bold mb-6 text-center text-gray-800">
+<body class="bg-gray-100 dark:bg-gray-900 flex items-center justify-center min-h-screen">
+  <div class="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg w-full max-w-2xl">
+    <h1 class="text-2xl font-bold mb-6 text-center text-gray-800 dark:text-gray-100">
       Transcriptor de Audio (by AFandinoC ❤️CDV)
     </h1>
     <div class="flex flex-col sm:flex-row items-center justify-between mb-4 gap-4">
@@ -25,7 +25,7 @@
           <span id="statusText" class="text-sm font-medium text-gray-600">Escuchando...</span>
         </div>
       </div>
-      <select id="languageSelect" aria-label="Seleccionar idioma" class="border border-gray-300 rounded-lg p-2 text-sm">
+      <select id="languageSelect" aria-label="Seleccionar idioma" class="border border-gray-300 rounded-lg p-2 text-sm dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600">
         <option value="es-ES">Español (España)</option>
         <option value="es-MX">Español (México)</option>
         <option value="es-PE" selected>Español (Perú)</option>
@@ -34,23 +34,26 @@
         <option value="fr-FR">Français</option>
         <option value="de-DE">Deutsch</option>
       </select>
+      <button id="themeToggle" aria-label="Alternar tema claro/oscuro" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-gray-100">
+        Modo Oscuro
+      </button>
     </div>
 
     <div class="mb-4">
-      <textarea id="transcriptOutput" class="w-full h-64 p-4 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="La transcripción con marcas de tiempo aparecerá aquí..." readonly></textarea>
+      <textarea id="transcriptOutput" class="w-full h-64 p-4 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600" placeholder="La transcripción con marcas de tiempo aparecerá aquí..." readonly></textarea>
     </div>
 
     <div class="flex justify-end items-center mb-4 gap-3">
-      <span id="copyFeedback" class="text-sm text-green-600 opacity-0">¡Copiado!</span>
+      <span id="copyFeedback" class="text-sm text-green-600 dark:text-green-400 opacity-0">¡Copiado!</span>
       <button id="copyButton" aria-label="Copiar texto de la transcripción" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out">
         Copiar Texto
       </button>
-      <button id="clearButton" aria-label="Limpiar transcripción" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out">
+      <button id="clearButton" aria-label="Limpiar transcripción" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-gray-100">
         Limpiar Texto
       </button>
     </div>
 
-    <div id="messageArea" class="text-red-500 text-sm mt-2 h-5"></div>
+    <div id="messageArea" class="text-red-500 dark:text-red-400 text-sm mt-2 h-5"></div>
   </div>
 
   <script src="script.js"></script>
