@@ -41,3 +41,35 @@ El archivo principal es un `index.html` que contiene toda la lógica JavaScript 
 
 ## 📂 Estructura del Repositorio
 
+
+```
+.
+├── index.html     # Página principal
+├── script.js      # Lógica de reconocimiento y controles
+├── styles.css     # Estilos personalizados
+├── README.md      # Documentación del proyecto
+└── LICENSE        # Texto de la licencia MIT
+```
+
+## 🚀 Uso
+
+1. Clona o descarga este repositorio.
+2. Sirve los archivos desde un servidor HTTP/HTTPS para permitir el acceso al micrófono. Por ejemplo:
+   ```bash
+   python3 -m http.server
+   ```
+3. Abre `http://localhost:8000/` en un navegador compatible (Chrome o Edge).
+4. Pulsa **Iniciar Transcripción** y empieza a hablar.
+5. Puedes **copiar** o **limpiar** el texto generado con los botones correspondientes.
+
+**Requisitos**
+- Conexión a Internet para cargar Tailwind CSS y Google Fonts.
+- Micrófono habilitado en tu equipo.
+
+El archivo principal se llama `index.html`, por lo que se abre automáticamente al acceder al directorio raíz del servidor.
+
+---
+
+## 📄 Licencia
+
+Este proyecto se distribuye bajo la licencia [MIT](LICENSE).
