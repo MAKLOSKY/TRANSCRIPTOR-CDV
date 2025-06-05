@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Transcriptor de Audio (by AFandinoC ❤️CDV)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    .listening-indicator {
+      width: 15px;
+      height: 15px;
+      background-color: red;
+      border-radius: 50%;
+      animation: pulse 1.5s infinite ease-in-out;
+    }
+    @keyframes pulse {
+      0% { transform: scale(0.8); opacity: 0.7; }
+      50% { transform: scale(1); opacity: 1; }
+      100% { transform: scale(0.8); opacity: 0.7; }
+    }
+    #transcriptOutput {
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    #copyFeedback {
+      transition: opacity 0.5s ease-in-out;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+  <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-2xl">
+    <h1 class="text-2xl font-bold mb-6 text-center text-gray-800">
+      Transcriptor de Audio (by AFandinoC ❤️CDV)
+    </h1>
+    <div class="flex flex-col sm:flex-row items-center justify-between mb-4 gap-4">
+      <div class="flex items-center gap-2">
+        <button id="toggleButton" aria-label="Iniciar o detener transcripción" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out">
+          Iniciar Transcripción
+        </button>
+        <div id="statusIndicator" class="flex items-center gap-2 hidden">
+          <div class="listening-indicator"></div>
+          <span id="statusText" class="text-sm font-medium text-gray-600">Escuchando...</span>
+        </div>
+      </div>
+      <select id="languageSelect" aria-label="Seleccionar idioma" class="border border-gray-300 rounded-lg p-2 text-sm">
+        <option value="es-ES">Español (España)</option>
+        <option value="es-MX">Español (México)</option>
+        <option value="es-PE" selected>Español (Perú)</option>
+        <option value="en-US">English (US)</option>
+        <option value="en-GB">English (UK)</option>
+        <option value="fr-FR">Français</option>
+        <option value="de-DE">Deutsch</option>
+      </select>
+    </div>
+
+    <div class="mb-4">
+      <textarea id="transcriptOutput" class="w-full h-64 p-4 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="La transcripción con marcas de tiempo aparecerá aquí..." readonly></textarea>
+    </div>
+
+    <div class="flex justify-end items-center mb-4 gap-3">
+      <span id="copyFeedback" class="text-sm text-green-600 opacity-0">¡Copiado!</span>
+      <button id="copyButton" aria-label="Copiar texto de la transcripción" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out">
+        Copiar Texto
+      </button>
+      <button id="clearButton" aria-label="Limpiar transcripción" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out">
+        Limpiar Texto
+      </button>
+    </div>
+
+    <div id="messageArea" class="text-red-500 text-sm mt-2 h-5"></div>
+  </div>
+
+  <script>
+    console.log("Script cargado correctamente.");
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const transcriptOutput = document.getElementById('transcriptOutput');
+    const toggleButton = document.getElementById('toggleButton');
+    const clearButton = document.getElementById('clearButton');
+    const copyButton = document.getElementById('copyButton');
+    const copyFeedback = document.getElementById('copyFeedback');
+    const statusIndicator = document.getElementById('statusIndicator');
+    const statusText = document.getElementById('statusText');
+    const messageArea = document.getElementById('messageArea');
+    const languageSelect = document.getElementById('languageSelect');
+
+    let recognition = null;
+    let isTranscribing = false;
+    let finalTranscript = '';
+
+    // Variables para el timer absoluto
+    let startTime = null;
+    let elapsedSeconds = 0;
+    let timerInterval = null;
+    // Bandera para identificar el primer resultado final
+    let firstResultRecorded = false;
+
+    // Función auxiliar para formatear tiempo en MM:SS
+    function formatTime(totalSeconds) {
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+      return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    }
+
+    if (SpeechRecognition) {
+      recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = languageSelect.value;
+
+      recognition.onstart = () => {
+        console.log("Reconocimiento iniciado (onstart).");
+        isTranscribing = true;
+        toggleButton.textContent = 'Detener Transcripción';
+        toggleButton.classList.remove('bg-blue-500', 'hover:bg-blue-700');
+        toggleButton.classList.add('bg-red-500', 'hover:bg-red-700');
+        statusIndicator.classList.remove('hidden');
+        statusText.textContent = 'Escuchando...';
+        messageArea.textContent = '';
+
+        // Iniciar timer absoluto desde el momento onstart
+        startTime = Date.now();
+        elapsedSeconds = 0;
+        firstResultRecorded = false;
+        timerInterval = setInterval(() => {
+          elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
+          console.log("Timer:", elapsedSeconds);
+        }, 1000);
+      };
+
+      recognition.onend = () => {
+        console.log("Reconocimiento finalizado (onend).");
+        isTranscribing = false;
+        toggleButton.textContent = 'Iniciar Transcripción';
+        toggleButton.classList.remove('bg-red-500', 'hover:bg-red-700');
+        toggleButton.classList.add('bg-blue-500', 'hover:bg-blue-700');
+        statusIndicator.classList.add('hidden');
+        clearInterval(timerInterval);
+      };
+
+      recognition.onresult = (event) => {
+        let interimTranscript = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const transcriptPart = event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            // Si es el primer resultado final, forzamos la marca a 00:00
+            if (!firstResultRecorded) {
+              finalTranscript += `[00:00] ${transcriptPart.trim()}\n`;
+              firstResultRecorded = true;
+              console.log("Primer resultado final. Se marca 00:00.");
+            } else {
+              // Resultados siguientes usan el tiempo absoluto
+              let timestamp = formatTime(elapsedSeconds);
+              finalTranscript += `[${timestamp}] ${transcriptPart.trim()}\n`;
+            }
+          } else {
+            interimTranscript += transcriptPart;
+          }
+        }
+        transcriptOutput.value = finalTranscript + interimTranscript;
+        transcriptOutput.scrollTop = transcriptOutput.scrollHeight;
+      };
+
+      recognition.onerror = (event) => {
+        console.error("Error en reconocimiento:", event.error);
+        let errorMessage = "Ocurrió un error";
+        switch(event.error) {
+          case "no-speech":
+            errorMessage = "No se detectó voz. Intenta hablar más claro o acércate al micrófono.";
+            break;
+          case "audio-capture":
+            errorMessage = "Error al capturar el audio. Asegurate que el micrófono esté conectado y permitido.";
+            break;
+          case "not-allowed":
+            errorMessage = "Permiso para acceder al micrófono denegado. Habilitalo en la configuración del navegador.";
+            break;
+          case "network":
+            errorMessage = "Error de red. Algunas APIs requieren conexión a internet.";
+            break;
+          case "language-not-supported":
+            errorMessage = "El idioma seleccionado no es compatible.";
+            break;
+        }
+        messageArea.textContent = `Error: ${errorMessage}`;
+        if (isTranscribing) recognition.stop();
+      };
+
+      toggleButton.addEventListener('click', () => {
+        console.log("Botón 'Iniciar/Detener' clickeado.");
+        if (isTranscribing) {
+          recognition.stop();
+          console.log("Deteniendo reconocimiento manualmente.");
+        } else {
+          // Reiniciamos variables para una nueva sesión
+          finalTranscript = '';
+          transcriptOutput.value = '';
+          messageArea.textContent = '';
+          recognition.lang = languageSelect.value;
+          try {
+            console.log("Iniciando reconocimiento...");
+            recognition.start();
+          } catch (error) {
+            console.error("Error iniciando reconocimiento:", error);
+            messageArea.textContent = "No se pudo iniciar la transcripción. ¿Permitiste el acceso al micrófono?";
+          }
+        }
+      });
+
+      clearButton.addEventListener('click', () => {
+        console.log("Botón 'Limpiar' clickeado.");
+        finalTranscript = '';
+        transcriptOutput.value = '';
+        messageArea.textContent = '';
+        clearInterval(timerInterval);
+        elapsedSeconds = 0;
+        startTime = null;
+        firstResultRecorded = false;
+        if (isTranscribing) {
+          recognition.stop();
+          console.log("Deteniendo reconocimiento al limpiar.");
+        }
+      });
+
+      copyButton.addEventListener('click', () => {
+        console.log("Botón 'Copiar' clickeado.");
+        const textToCopy = transcriptOutput.value;
+        if (!textToCopy) {
+          messageArea.textContent = "No hay texto para copiar.";
+          setTimeout(() => messageArea.textContent = '', 2000);
+          return;
+        }
+        navigator.clipboard.writeText(textToCopy)
+          .then(() => {
+            console.log("Texto copiado al portapapeles.");
+            copyFeedback.style.opacity = 1;
+            setTimeout(() => { copyFeedback.style.opacity = 0; }, 1500);
+          })
+          .catch(err => {
+            console.error("Error al copiar texto:", err);
+            messageArea.textContent = "Error al copiar el texto.";
+            setTimeout(() => messageArea.textContent = '', 2000);
+          });
+      });
+
+      languageSelect.addEventListener('change', () => {
+        recognition.lang = languageSelect.value;
+        console.log(`Idioma cambiado a: ${recognition.lang}`);
+        if (isTranscribing) {
+          console.log("Idioma cambiado durante la transcripción. Detén e inicia para aplicar el cambio.");
+        }
+      });
+    } else {
+      toggleButton.disabled = true;
+      languageSelect.disabled = true;
+      clearButton.disabled = true;
+      copyButton.disabled = true;
+      messageArea.textContent = "Tu navegador no soporta la API Web Speech. Intenta con Chrome o Edge.";
+      console.warn("Web Speech API not supported in this browser.");
+    }
+  </script>
+</body>
+</html>
